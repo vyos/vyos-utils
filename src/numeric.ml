@@ -15,6 +15,8 @@ let int_of_string_opt = Big_int.big_int_of_string_opt
 let big = Big_int.big_int_of_int
 let (>=) = Big_int.ge_big_int
 let (<=) = Big_int.le_big_int
+let (<) = Big_int.lt_big_int
+let (>) = Big_int.gt_big_int
 
 let opts = ref default_opts
 
