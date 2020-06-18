@@ -11,7 +11,7 @@ let validate_value value_constraint value =
                 especially when the input comes directly from the user...
                 We should do something about it.
          *)
-        let result = Unix.system (Printf.sprintf "%s %s" c value) in
+        let result = Unix.system (Printf.sprintf "%s \'%s\'" c value) in
         match result with
         | Unix.WEXITED 0 -> true
         | Unix.WEXITED 127 ->

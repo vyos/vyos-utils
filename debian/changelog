@@ -1,3 +1,9 @@
+vyos-utils (0.0.3) unstable; urgency=medium
+
+  * Quote values properly (T1901).
+
+ -- Daniil Baturin <daniil@vyos.io>  Fri, 19 Jun 2020 02:12:22 +0300
+
 vyos-utils (0.0.2) unstable; urgency=medium
 
   * Fixed an invalid argument bug in the --non-negative option.
