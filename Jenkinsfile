@@ -1,4 +1,4 @@
-// Copyright (C) 2020 VyOS maintainers and contributors
+// Copyright (C) 2020-2021 VyOS maintainers and contributors
 //
 // This program is free software; you can redistribute it and/or modify
 // in order to easy exprort images built to "external" world
@@ -12,7 +12,6 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
 @NonCPS
 
 // Using a version specifier library, use 'current' branch. The underscore (_)
@@ -21,5 +20,4 @@
 @Library('vyos-build@current')_
 
 // Start package build using library function from https://github.com/vyos/vyos-build
-def buildCmd = "eval \$(opam env --root=/opt/opam --set-root) && dpkg-buildpackage -b -us -uc -tc"
-buildPackage(null, null, buildCmd)
+buildPackage(null, null, null, true)
