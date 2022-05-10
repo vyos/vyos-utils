@@ -8,7 +8,7 @@ DIR := debian/tmp
 override_dh_auto_build:
 	eval `opam env`
 	mkdir -p _build
-	ocamlfind ocamlopt -o _build/numeric src/numeric.ml
+	ocamlfind ocamlopt -o _build/numeric -package pcre -linkpkg src/numeric.ml
 	ocamlfind ocamlopt -o _build/validate-value -package pcre,unix,containers -linkpkg src/validate_value.ml
 
 override_dh_auto_install:

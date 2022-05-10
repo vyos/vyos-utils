@@ -35,7 +35,12 @@ let check_positive opts n =
   if opts.positive && (n <= 0.0) then
   failwith "Number should be positive"
 
+let looks_like_number value =
+  try let _ = Pcre.exec ~pat:"^(\\-?)[0-9]+(\\.[0-9]+)?$" value in true
+  with Not_found -> false
+
 let number_of_string opts s =
+  if not (looks_like_number s) then Printf.ksprintf failwith "'%s' is not a valid number" s else
   let n = float_of_string_opt s in
   match n with
   | Some n ->
