@@ -3,13 +3,15 @@ type options = {
   nonnegative: bool;
   allow_float: bool;
   ranges: string list;
+  relative: bool;
 }
 
 let default_opts = {
   positive = false;
   nonnegative = false;
   allow_float = false;
-  ranges = []
+  ranges = [];
+  relative = false
 }
 
 let opts = ref default_opts
@@ -21,6 +23,8 @@ let args = [
     ("--positive", Arg.Unit (fun () -> opts := {!opts with positive=true}), "Check if the number is positive (> 0)");
     ("--range", Arg.String (fun s -> let optsv = !opts in opts := {optsv with ranges=(s :: optsv.ranges)}), "Check if the number is within a range (inclusive)");
     ("--float", Arg.Unit (fun () -> opts := {!opts with allow_float=true}), "Allow floating-point numbers");
+    ("--relative", Arg.Unit (fun () -> opts := {!opts with relative=true}), "Allow relative increment/decrement (+/-N)");
+    ("--", Arg.Rest (fun s -> number_arg := s), "Interpret next item as an argument");
 ]
 let usage = Printf.sprintf "Usage: %s [OPTIONS] <number>" Sys.argv.(0)
 
@@ -38,6 +42,20 @@ let check_positive opts n =
 let looks_like_number value =
   try let _ = Pcre.exec ~pat:"^(\\-?)[0-9]+(\\.[0-9]+)?$" value in true
   with Not_found -> false
+
+let is_relative value =
+  try let _ = Pcre.exec ~pat:"^[+-][0-9]+$" value in true
+  with Not_found -> false
+
+let number_string_from_relative value =
+  String.sub value 1 (String.length value - 1)
+
+let get_relative opts s =
+  if opts.relative then
+    if not (is_relative s) then
+      failwith "Value is not a relative increment/decrement"
+    else number_string_from_relative s
+  else s
 
 let number_of_string opts s =
   if not (looks_like_number s) then Printf.ksprintf failwith "'%s' is not a valid number" s else
@@ -75,7 +93,8 @@ let check_ranges ranges n =
 
 let () = try
   let opts = !opts in
-  let n = number_of_string opts !number_arg in
+  let s = get_relative opts !number_arg in
+  let n = number_of_string opts s in
   check_nonnegative opts n;
   check_positive opts n;
   if opts.ranges <> [] then
