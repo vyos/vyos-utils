@@ -1,8 +1,12 @@
+type numeric_str = Number_string of string | Range_string of string
+type numeric_val = Number_float of float | Range_float of float * float
+
 type options = {
   positive: bool;
   nonnegative: bool;
   allow_float: bool;
   ranges: string list;
+  not_ranges: string list;
   relative: bool;
 }
 
@@ -11,7 +15,8 @@ let default_opts = {
   nonnegative = false;
   allow_float = false;
   ranges = [];
-  relative = false
+  not_ranges = [];
+  relative = false;
 }
 
 let opts = ref default_opts
@@ -21,23 +26,34 @@ let number_arg = ref ""
 let args = [
     ("--non-negative", Arg.Unit (fun () -> opts := {!opts with nonnegative=true}), "Check if the number is non-negative (>= 0)");
     ("--positive", Arg.Unit (fun () -> opts := {!opts with positive=true}), "Check if the number is positive (> 0)");
-    ("--range", Arg.String (fun s -> let optsv = !opts in opts := {optsv with ranges=(s :: optsv.ranges)}), "Check if the number is within a range (inclusive)");
+    ("--range", Arg.String (fun s -> let optsv = !opts in opts := {optsv with ranges=(s :: optsv.ranges)}), "Check if the number or range is within a range (inclusive)");
+    ("--not-range", Arg.String (fun s -> let optsv = !opts in opts := {optsv with not_ranges=(s :: optsv.not_ranges)}), "Check if the number or range is not within a range (inclusive)");
     ("--float", Arg.Unit (fun () -> opts := {!opts with allow_float=true}), "Allow floating-point numbers");
     ("--relative", Arg.Unit (fun () -> opts := {!opts with relative=true}), "Allow relative increment/decrement (+/-N)");
     ("--", Arg.Rest (fun s -> number_arg := s), "Interpret next item as an argument");
 ]
-let usage = Printf.sprintf "Usage: %s [OPTIONS] <number>" Sys.argv.(0)
+let usage = Printf.sprintf "Usage: %s [OPTIONS] <number>|<range>" Sys.argv.(0)
 
 let () = if Array.length Sys.argv = 1 then (Arg.usage args usage; exit 1)
 let () = Arg.parse args (fun s -> number_arg := s) usage
 
-let check_nonnegative opts n =
-  if opts.nonnegative && (n < 0.0) then
-  failwith "Number should be non-negative."
+let check_nonnegative opts m =
+  if opts.nonnegative then
+    match m with
+    | Number_float n ->
+        if (n < 0.0) then
+          failwith "Number should be non-negative."
+    | Range_float _ ->
+        failwith "option '--non-negative' does not apply to a range value"
 
-let check_positive opts n =
-  if opts.positive && (n <= 0.0) then
-  failwith "Number should be positive"
+let check_positive opts m =
+  if opts.positive then
+    match m with
+    | Number_float n ->
+        if (n <= 0.0) then
+          failwith "Number should be positive"
+    | Range_float _ ->
+        failwith "option '--positive does' not apply to a range value"
 
 let looks_like_number value =
   try let _ = Pcre.exec ~pat:"^(\\-?)[0-9]+(\\.[0-9]+)?$" value in true
@@ -47,15 +63,19 @@ let is_relative value =
   try let _ = Pcre.exec ~pat:"^[+-][0-9]+$" value in true
   with Not_found -> false
 
-let number_string_from_relative value =
+let number_string_drop_modifier value =
   String.sub value 1 (String.length value - 1)
 
-let get_relative opts s =
+let get_relative opts t =
   if opts.relative then
-    if not (is_relative s) then
-      failwith "Value is not a relative increment/decrement"
-    else number_string_from_relative s
-  else s
+    match t with
+    | Number_string s ->
+        if not (is_relative s) then
+          failwith "Value is not a relative increment/decrement"
+        else Number_string (number_string_drop_modifier s)
+    | Range_string _ ->
+        failwith "increment/decrement does not apply to a range value"
+  else t
 
 let number_of_string opts s =
   if not (looks_like_number s) then Printf.ksprintf failwith "'%s' is not a valid number" s else
@@ -85,21 +105,62 @@ let range_of_string opts s =
     (* The range itself if malformed, like 1-10-20. *)
     Printf.ksprintf failwith "'%s' is not a valid number range" s
 
-let check_ranges ranges n =
+let value_in_ranges ranges n =
   let in_range (l, r) n = (n >= l) && (n <= r) in
-  let res = List.fold_left (fun acc r -> acc || (in_range r n)) false ranges in
-  if not res then
-  Printf.ksprintf failwith "Number is not in any of allowed ranges"
+  List.fold_left (fun acc r -> acc || (in_range r n)) false ranges
 
-let () = try
-  let opts = !opts in
-  let s = get_relative opts !number_arg in
-  let n = number_of_string opts s in
-  check_nonnegative opts n;
-  check_positive opts n;
+let value_not_in_ranges ranges n =
+  let in_range (l, r) n = (n >= l) && (n <= r) in
+  List.fold_left (fun acc r -> acc && (not (in_range r n))) true ranges
+
+let check_ranges opts m =
   if opts.ranges <> [] then
     let ranges = List.map (range_of_string opts) opts.ranges in
-    check_ranges ranges n
+    match m with
+    | Number_float n ->
+        if not (value_in_ranges ranges n) then
+          Printf.ksprintf failwith "Number is not in any of allowed ranges"
+    | Range_float (i, j) ->
+        if (not (value_in_ranges ranges i) ||
+            not (value_in_ranges ranges j)) then
+              Printf.ksprintf failwith "Range is not in any of allowed ranges"
+
+
+let check_not_ranges opts m =
+  if opts.not_ranges <> [] then
+    let ranges = List.map (range_of_string opts) opts.not_ranges in
+    match m with
+    | Number_float n ->
+        if not (value_not_in_ranges ranges n) then
+          Printf.ksprintf failwith "Number is in one of excluded ranges"
+    | Range_float (i, j) ->
+        if (not (value_not_in_ranges ranges i) ||
+            not (value_not_in_ranges ranges j)) then
+              Printf.ksprintf failwith "Range is in one of excluded ranges"
+
+let is_range_val s =
+  try let _ = Pcre.exec ~pat:"^[0-9]+-[0-9]+$" s in true
+  with Not_found -> false
+
+let var_numeric_str s =
+  match is_range_val s with
+  | true -> Range_string s
+  | false ->  Number_string s
+
+let () = try
+  let s = var_numeric_str !number_arg in
+  let opts = !opts in
+  let s = get_relative opts s in
+  let n =
+    match s with
+    | Number_string r -> Number_float (number_of_string opts r)
+    | Range_string r -> let i, j = range_of_string opts r in
+                   Range_float (i, j)
+  in
+  check_nonnegative opts n;
+  check_positive opts n;
+  check_ranges opts n;
+  check_not_ranges opts n
 with (Failure err) ->
   print_endline err;
   exit 1
