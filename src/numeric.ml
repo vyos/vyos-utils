@@ -8,6 +8,7 @@ type options = {
   ranges: string list;
   not_ranges: string list;
   relative: bool;
+  allow_range: bool;
 }
 
 let default_opts = {
@@ -17,6 +18,7 @@ let default_opts = {
   ranges = [];
   not_ranges = [];
   relative = false;
+  allow_range = false;
 }
 
 let opts = ref default_opts
@@ -30,6 +32,7 @@ let args = [
     ("--not-range", Arg.String (fun s -> let optsv = !opts in opts := {optsv with not_ranges=(s :: optsv.not_ranges)}), "Check if the number or range is not within a range (inclusive)");
     ("--float", Arg.Unit (fun () -> opts := {!opts with allow_float=true}), "Allow floating-point numbers");
     ("--relative", Arg.Unit (fun () -> opts := {!opts with relative=true}), "Allow relative increment/decrement (+/-N)");
+    ("--allow-range", Arg.Unit (fun () -> opts := {!opts with allow_range=true}), "Allow the argument to be a range rather than a single number");
     ("--", Arg.Rest (fun s -> number_arg := s), "Interpret next item as an argument");
 ]
 let usage = Printf.sprintf "Usage: %s [OPTIONS] <number>|<range>" Sys.argv.(0)
@@ -138,6 +141,13 @@ let check_not_ranges opts m =
             not (value_not_in_ranges ranges j)) then
               Printf.ksprintf failwith "Range is in one of excluded ranges"
 
+let check_argument_type opts m =
+  match m with
+  | Number_float _ -> ()
+  | Range_float _ ->
+    if opts.allow_range then ()
+    else Printf.ksprintf failwith "Value must be a number, not a range"
+
 let is_range_val s =
   try let _ = Pcre.exec ~pat:"^[0-9]+-[0-9]+$" s in true
   with Not_found -> false
@@ -157,6 +167,7 @@ let () = try
     | Range_string r -> let i, j = range_of_string opts r in
                    Range_float (i, j)
   in
+  check_argument_type opts n;
   check_nonnegative opts n;
   check_positive opts n;
   check_ranges opts n;
