@@ -1,12 +1,14 @@
 type opts = {
   must_be_file : bool;
   parent : string option;
+  lookup_path : string option;
   strict : bool; 
 }
 
 let default_opts = {
   must_be_file = true;
   parent = None;
+  lookup_path = None;
   strict = false
 }
 
@@ -18,6 +20,7 @@ let args = [
     ("--file", Arg.Unit (fun () -> opts := {!opts with must_be_file=true}), "Path must point to a file and not a directory (default)");
     ("--directory", Arg.Unit (fun () -> opts := {!opts with must_be_file=false}), "Path must point to a directory");
     ("--parent-dir", Arg.String (fun s -> opts := {!opts with parent=(Some s)}), "Path must be inside specific parent directory");
+    ("--lookup-path", Arg.String (fun s -> opts := {!opts with lookup_path=(Some s)}), "Prefix path argument with lookup path");
     ("--strict", Arg.Unit (fun () -> opts := {!opts with strict=true}), "Treat warnings as errors");
 ]
 let usage = Printf.sprintf "Usage: %s [OPTIONS] <path>" Sys.argv.(0)
@@ -30,8 +33,12 @@ let fail msg =
   exit 1
 
 let () =
-  let path = !path_arg in
   let opts = !opts in
+  let path =
+    match opts.lookup_path with
+    | None -> !path_arg
+    | Some lookup_path -> FilePath.concat lookup_path !path_arg
+  in
   (* First, check if the file/dir path exists at all. *)
   let exists = FileUtil.test FileUtil.Exists path in
   if not exists then Printf.ksprintf fail {|Incorrect path %s: no such file or directory|} path else
