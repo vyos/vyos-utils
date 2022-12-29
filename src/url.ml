@@ -105,7 +105,7 @@ let host_path_matches s =
       | host when regex_matches ipv4_addr_format host -> is_ipv4_addr host
       | host when regex_matches host_name_format host -> true
       | _ -> false
-  with Not_found -> false;
+  with Not_found -> false
 
 let validate_uri scheme uri =
   if host_path_matches uri then Ok ()
