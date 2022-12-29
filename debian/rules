@@ -10,6 +10,7 @@ override_dh_auto_build:
 	mkdir -p _build
 	ocamlfind ocamlopt -o _build/numeric -package pcre -linkpkg src/numeric.ml
 	ocamlfind ocamlopt -o _build/file-path -package fileutils -linkpkg src/file_path.ml
+	ocamlfind ocamlopt -o _build/url -package pcre -linkpkg src/url.ml
 	ocamlfind ocamlopt -o _build/validate-value -package pcre,unix,containers -linkpkg src/validate_value.ml
 
 override_dh_auto_install:
