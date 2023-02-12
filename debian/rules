@@ -12,6 +12,12 @@ override_dh_auto_build:
 	ocamlfind ocamlopt -o _build/file-path -package fileutils -linkpkg src/file_path.ml
 	ocamlfind ocamlopt -o _build/url -package pcre -linkpkg src/url.ml
 	ocamlfind ocamlopt -o _build/validate-value -package pcre,unix,containers -linkpkg src/validate_value.ml
+#   list_interfaces
+	ocamlfind ocamlopt -c src/iface/func.mli
+	ocamlfind ocamlopt -I src/iface -c src/iface/func.ml
+	ocamlfind ocamlopt -I src/iface -c src/iface/iface.c
+	ocamlfind ocamlopt -I src/iface -package pcre -c src/iface/list_interfaces.ml
+	ocamlfind ocamlopt -I src/iface func.cmx iface.o list_interfaces.cmx -o _build/list_interfaces -package pcre -linkpkg
 
 override_dh_auto_install:
 	mkdir -p $(DIR)/usr/libexec/vyos/validators
@@ -19,6 +25,7 @@ override_dh_auto_install:
 	cp _build/validate-value $(DIR)/usr/libexec/vyos/
 	cp _build/file-path $(DIR)/usr/libexec/vyos/validators
 	cp _build/url $(DIR)/usr/libexec/vyos/validators
+	cp _build/list_interfaces $(DIR)/usr/libexec/vyos/completion
 
 override_dh_auto_test:
 	echo "No tests yet"
