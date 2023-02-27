@@ -2,3 +2,4 @@ usr/libexec/vyos/validate-value
 usr/libexec/vyos/validators/numeric
 usr/libexec/vyos/validators/file-path
 usr/libexec/vyos/validators/url
+usr/libexec/vyos/completion/list_interfaces
