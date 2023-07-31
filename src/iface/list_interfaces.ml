@@ -4,12 +4,14 @@ let intf_type = ref ""
 let broadcast = ref false
 let bridgeable = ref false
 let bondable = ref false
+let no_vlan = ref false
 
 let args = [
     ("--type", Arg.String (fun s -> intf_type := s), "List interfaces of specified type");
     ("--broadcast", Arg.Unit (fun () -> broadcast := true), "List broadcast interfaces");
     ("--bridgeable", Arg.Unit (fun () -> bridgeable := true), "List bridgeable interfaces");
     ("--bondable", Arg.Unit (fun () -> bondable := true), "List bondable interfaces");
+    ("--no-vlan-subinterfaces", Arg.Unit (fun () -> no_vlan := true), "List only parent interfaces");
 ]
 let usage = Printf.sprintf "Usage: %s [OPTIONS] <number>" Sys.argv.(0)
 
@@ -89,6 +91,14 @@ let filter_bondable s =
         true
     with Not_found -> false
 
+let filter_no_vlan s =
+    let pattern = {|^([^.]+)(\.\d+)+$|}
+    in
+    try
+        let _ = Pcre.exec ~pat:pattern s in
+        false
+    with Not_found -> true
+
 let get_interfaces =
     let intf_type = !intf_type in
     let fltr =
@@ -108,6 +118,10 @@ let get_interfaces =
     in
     let res =
         if !bondable then List.filter filter_bondable res
+        else res
+    in
+    let res =
+        if !no_vlan then List.filter filter_no_vlan res
         else res
     in
     let res = List.filter filter_section res in
