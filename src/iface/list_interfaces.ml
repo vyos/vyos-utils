@@ -76,7 +76,7 @@ let filter_broadcast s =
     with Not_found -> false
 
 let filter_bridgeable s =
-    let pattern = {|^(bond|eth|gnv|l2tpeth|lo|tun|veth|vtun|wlan)(.*)$|}
+    let pattern = {|^(bond|eth|gnv|l2tpeth|lo|tun|veth|vtun|vxlan|wlan)(.*)$|}
     in
     try
         let _ = Pcre.exec ~pat:pattern s in
