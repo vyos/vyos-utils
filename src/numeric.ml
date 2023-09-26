@@ -7,6 +7,7 @@ type options = {
   allow_float: bool;
   ranges: string list;
   not_ranges: string list;
+  not_values: string list;
   relative: bool;
   allow_range: bool;
 }
@@ -17,6 +18,7 @@ let default_opts = {
   allow_float = false;
   ranges = [];
   not_ranges = [];
+  not_values = [];
   relative = false;
   allow_range = false;
 }
@@ -30,6 +32,7 @@ let args = [
     ("--positive", Arg.Unit (fun () -> opts := {!opts with positive=true}), "Check if the number is positive (> 0)");
     ("--range", Arg.String (fun s -> let optsv = !opts in opts := {optsv with ranges=(s :: optsv.ranges)}), "Check if the number or range is within a range (inclusive)");
     ("--not-range", Arg.String (fun s -> let optsv = !opts in opts := {optsv with not_ranges=(s :: optsv.not_ranges)}), "Check if the number or range is not within a range (inclusive)");
+    ("--not-value", Arg.String (fun s -> let optsv = !opts in opts := {optsv with not_values=(s :: optsv.not_values)}), "Check if the number does not equal a specific value");
     ("--float", Arg.Unit (fun () -> opts := {!opts with allow_float=true}), "Allow floating-point numbers");
     ("--relative", Arg.Unit (fun () -> opts := {!opts with relative=true}), "Allow relative increment/decrement (+/-N)");
     ("--allow-range", Arg.Unit (fun () -> opts := {!opts with allow_range=true}), "Allow the argument to be a range rather than a single number");
@@ -141,6 +144,18 @@ let check_not_ranges opts m =
             not (value_not_in_ranges ranges j)) then
               Printf.ksprintf failwith "Range is in one of excluded ranges"
 
+let check_not_values opts m =
+  let excluded_values = List.map (number_of_string opts) opts.not_values in
+  match m with
+  | Range_float _ -> Printf.ksprintf failwith "--not-value cannot be used with ranges"
+  | Number_float num ->
+    begin
+      let res = List.find_opt ((=) num) excluded_values in
+      match res with
+      | None -> ()
+      | Some _ -> Printf.ksprintf failwith "Value is excluded by --not-value"
+    end
+
 let check_argument_type opts m =
   match m with
   | Number_float _ -> ()
@@ -170,6 +185,7 @@ let () = try
   check_argument_type opts n;
   check_nonnegative opts n;
   check_positive opts n;
+  check_not_values opts n;
   check_ranges opts n;
   check_not_ranges opts n
 with (Failure err) ->
