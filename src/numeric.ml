@@ -146,6 +146,7 @@ let check_not_ranges opts m =
 
 let check_not_values opts m =
   let excluded_values = List.map (number_of_string opts) opts.not_values in
+  if excluded_values = [] then () else
   match m with
   | Range_float _ -> Printf.ksprintf failwith "--not-value cannot be used with ranges"
   | Number_float num ->
