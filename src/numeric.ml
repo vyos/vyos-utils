@@ -141,6 +141,22 @@ let check_not_ranges opts m =
             not (value_not_in_ranges ranges j)) then
               Printf.ksprintf failwith "Range is in one of excluded ranges"
 
+<<<<<<< HEAD
+=======
+let check_not_values opts m =
+  let excluded_values = List.map (number_of_string opts) opts.not_values in
+  if excluded_values = [] then () else
+  match m with
+  | Range_float _ -> Printf.ksprintf failwith "--not-value cannot be used with ranges"
+  | Number_float num ->
+    begin
+      let res = List.find_opt ((=) num) excluded_values in
+      match res with
+      | None -> ()
+      | Some _ -> Printf.ksprintf failwith "Value is excluded by --not-value"
+    end
+
+>>>>>>> ba5e563 (numeric: T5638: Do not complain about range arguments in check_not_value when it's not necessary)
 let check_argument_type opts m =
   match m with
   | Number_float _ -> ()
