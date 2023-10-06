@@ -10,6 +10,7 @@ type options = {
   not_values: string list;
   relative: bool;
   allow_range: bool;
+  require_range: bool;
 }
 
 let default_opts = {
@@ -21,6 +22,7 @@ let default_opts = {
   not_values = [];
   relative = false;
   allow_range = false;
+  require_range = false;
 }
 
 let opts = ref default_opts
@@ -36,6 +38,7 @@ let args = [
     ("--float", Arg.Unit (fun () -> opts := {!opts with allow_float=true}), "Allow floating-point numbers");
     ("--relative", Arg.Unit (fun () -> opts := {!opts with relative=true}), "Allow relative increment/decrement (+/-N)");
     ("--allow-range", Arg.Unit (fun () -> opts := {!opts with allow_range=true}), "Allow the argument to be a range rather than a single number");
+    ("--require-range", Arg.Unit (fun () -> opts := {!opts with require_range=true; allow_range=true}), "Require the argument to be a range rather than a single number");
     ("--", Arg.Rest (fun s -> number_arg := s), "Interpret next item as an argument");
 ]
 let usage = Printf.sprintf "Usage: %s [OPTIONS] <number>|<range>" Sys.argv.(0)
@@ -159,7 +162,9 @@ let check_not_values opts m =
 
 let check_argument_type opts m =
   match m with
-  | Number_float _ -> ()
+  | Number_float _ ->
+    if opts.require_range then Printf.ksprintf failwith "Value must be a range, not a number"
+    else ()
   | Range_float _ ->
     if opts.allow_range then ()
     else Printf.ksprintf failwith "Value must be a number, not a range"
