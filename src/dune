@@ -1,0 +1,34 @@
+(include_subdirs unqualified)
+
+(executable
+ (name numeric)
+ (public_name numeric)
+ (modules numeric)
+ (libraries pcre))
+
+(executable
+ (name url)
+ (public_name url)
+ (modules url)
+ (libraries pcre))
+
+(executable
+ (name file_path)
+ (public_name file-path)
+ (modules file_path)
+ (libraries fileutils))
+
+(executable
+ (name validate_value)
+ (public_name validate-value)
+ (modules validate_value)
+ (libraries pcre unix containers))
+
+(executable
+ (name list_interfaces)
+ (public_name list_interfaces)
+ (modules func list_interfaces)
+ (libraries pcre)
+ (foreign_stubs
+  (language c)
+  (names iface)))
