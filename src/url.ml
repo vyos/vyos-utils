@@ -30,7 +30,7 @@ let regex_matches regex s =
 
 let host_path_format =
   Pcre.regexp
-  {|^//(?:[a-zA-Z0-9\-\._~]+(?::[a-zA-Z0-9\-\._~]*)?@)?([a-zA-Z0-9\-\._~]+|\[[a-zA-Z0-9:\.]+\])(?::([0-9]+))?(/.*)?$|}
+  {|^//(?:[^/?#]+(?::[^/?#]*)?@)?([a-zA-Z0-9\-\._~]+|\[[a-zA-Z0-9:\.]+\])(?::([0-9]+))?(/.*)?$|}
 
 let host_name_format = Pcre.regexp {|^[a-zA-Z0-9]+([\-\._~]{1}[a-zA-Z0-9]+)*$|}
 let ipv4_addr_format = Pcre.regexp {|^(([1-9]\d{0,2}|0)\.){3}([1-9]\d{0,2}|0)$|}
