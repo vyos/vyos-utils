@@ -19,7 +19,7 @@ let rec validate_value buf value_constraint value =
        especially when the input comes directly from the user...
        We should do something about it.
      *)
-    let chan = Unix.open_process_in (Printf.sprintf "%s \'%s\' 2>&1" c value) in
+    let chan = Unix.open_process_in (Printf.sprintf "%s \'%s\'" c value) in
     let out = try CCIO.read_all chan with _ -> "" in
     let result = Unix.close_process_in chan in
     match result with
