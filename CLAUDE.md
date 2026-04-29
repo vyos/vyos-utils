@@ -5,7 +5,7 @@ OCaml validator, completion-helper, and operational-mode wrapper binaries that t
 
 ## Tech stack
 - OCaml; `dune` 2.0 build system; `opam` package metadata in `vyos-utils.opam`.
-- Build deps (per opam): `ocamlfind`, `dune >= 2.0`. Trivially small for an OCaml project.
+- Build deps: `ocamlfind`, `dune >= 2.0`, `pcre2`, `fileutils`, `containers`, `logs`, `fmt`, `yojson`, `mustache`.
 - Debian packaging in `debian/` (`debhelper >= 9`, `quilt`).
 
 ## Build / test / run
