@@ -36,7 +36,3 @@ Canonical side. Mirror twin: `VyOS-Networks/vyos-utils` (force-pushed from this 
 - Keep dune deps minimal; this binary is on the hot path of every CLI commit.
 - New validator? Wire it into `vyos-1x` XML and add a smoketest there.
 - LICENSE/opam license mismatch (GPL-2.0 vs MIT) is worth resolving on any non-trivial change.
-
----
-
-This file is mirrored on Confluence: [`vyos/vyos-utils`](https://internal.confluence.vyos.com/wiki/spaces/VYOS/pages/818413820). The Confluence page also carries the per-repo audit data (settings, workflows, secret counts, hygiene) that complements this CLAUDE.md. Edit either side; resync via the documentation pipeline.
