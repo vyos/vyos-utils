@@ -1,7 +1,7 @@
 # CLAUDE.md
 
 ## Project purpose
-OCaml validator and completion-helper binaries that the VyOS CLI invokes at runtime from XML interface definitions (`<validator name='numeric' .../>`, `<validator name='url' .../>`, etc.).
+OCaml validator, completion-helper, and operational-mode wrapper binaries that the VyOS CLI invokes at runtime. Validators are referenced from XML interface definitions (`<validator name='numeric' .../>`, `<validator name='url' .../>`, etc.); `vyos-op-run` is the privileged wrapper that looks up and executes operational mode commands on behalf of operator-level users.
 
 ## Tech stack
 - OCaml; `dune` 2.0 build system; `opam` package metadata in `vyos-utils.opam`.
@@ -14,10 +14,10 @@ OCaml validator and completion-helper binaries that the VyOS CLI invokes at runt
 - No `dune runtest` suite in tree; validators are exercised in `vyos-1x` smoketests.
 
 ## Repository layout
-- `src/` — OCaml sources for `validate_value`, validators (`file_path`, `numeric`, `url`), completion helpers (`list_interfaces`).
+- `src/` — OCaml sources for `validate_value`, validators (`file_path`, `numeric`, `url`), completion helpers (`list_interfaces`), and `vyos_op_run` (operational mode command wrapper).
 - `dune-project`, `vyos-utils.opam` — build and package metadata.
 - `debian/` — packaging.
-- `.github/workflows/` — `check-pr-conflicts.yml`, `cla-check.yml`, `pr-mirror-repo-sync.yml`, `trigger-rebuild-repo-package.yml` — all delegate to `vyos/.github` reusables.
+- `.github/workflows/` — `check-pr-conflicts.yml`, `pr-mirror-repo-sync.yml`, `trigger-rebuild-repo-package.yml` delegate to `vyos/.github` reusables; `cla-check.yml` delegates to `vyos/vyos-cla-signatures`.
 
 ## Cross-repo context
 - Listed in `VyOS-Networks/vyos-build-packages/repos.toml` as one of the 14 canonical source packages baked into VyOS images by `vyos/vyos-build`.
