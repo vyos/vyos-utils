@@ -20,7 +20,7 @@ OCaml validator, completion-helper, and operational-mode wrapper binaries that t
 - `.github/workflows/` — `check-pr-conflicts.yml`, `pr-mirror-repo-sync.yml`, `trigger-rebuild-repo-package.yml` delegate to `vyos/.github` reusables; `cla-check.yml` delegates to `vyos/vyos-cla-signatures`.
 
 ## Cross-repo context
-- Listed in `VyOS-Networks/vyos-build-packages/repos.toml` as one of the 14 canonical source packages baked into VyOS images by `vyos/vyos-build`.
+- Listed in an internal repository as one of the 14 canonical source packages baked into VyOS images by `vyos/vyos-build`.
 - Validator binaries are referenced from XML in `vyos/vyos-1x/interface-definitions/` — that is the runtime consumer.
 - Live consumer of the generation-1 mirror pipeline (`pr-mirror-repo-sync.yml@current`) — one of only four repos confirmed live (`vyos-1x`, `vyos-build`, `vyos-utils`, `vyos1x-config`).
 
@@ -28,9 +28,6 @@ OCaml validator, completion-helper, and operational-mode wrapper binaries that t
 - Commit / PR title: `component: T12345: description` (Phorge ID mandatory).
 - Default branch `current`. License GPL-2.0 in tree; opam declares `MIT` (note the discrepancy if redistributing).
 - Reusable workflows pinned as `uses: vyos/.github/.github/workflows/<X>.yml@current`.
-
-## Mirror relationship
-Canonical side. Mirror twin: `VyOS-Networks/vyos-utils` (force-pushed from this repo by the mirror pipeline). Only edit the `vyos/*` side; the VyOS-Networks subpage links back here.
 
 ## Notes for future contributors
 - Keep dune deps minimal; this binary is on the hot path of every CLI commit.
