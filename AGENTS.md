@@ -9,7 +9,7 @@ OCaml validator, completion-helper, and operational-mode wrapper binaries that t
 - Debian packaging in `debian/` (`debhelper >= 9`, `quilt`).
 
 ## Build / test / run
-- Local: `opam install. --deps-only` then `dune build -p vyos-utils`.
+- Local: `opam install . --deps-only` then `dune build -p vyos-utils`.
 - Debian: `dpkg-buildpackage -us -uc -b` produces the `vyos-utils` `.deb`.
 - No `dune runtest` suite in tree; validators are exercised in `vyos-1x` smoketests.
 
