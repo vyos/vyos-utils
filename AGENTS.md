@@ -1,7 +1,7 @@
 # AGENTS.md
 
 ## Project purpose
-OCaml validator, completion-helper, and operational-mode wrapper binaries that the VyOS CLI invokes at runtime. Validators are referenced from XML interface definitions (`<validator name='numeric' .../>`, `<validator name='url' .../>`, etc.); `vyos-op-run` is the privileged wrapper that looks up and executes operational mode commands on behalf of operator-level users.
+OCaml validator, completion-helper, and operational-mode wrapper binaries that the VyOS CLI invokes at runtime. Validators are referenced from XML interface definitions (`<validator name='numeric'.../>`, `<validator name='url'.../>`, etc.); `vyos-op-run` is the privileged wrapper that looks up and executes operational mode commands on behalf of operator-level users.
 
 ## Tech stack
 - OCaml; `dune` 2.0 build system; `opam` package metadata in `vyos-utils.opam`.
@@ -9,7 +9,7 @@ OCaml validator, completion-helper, and operational-mode wrapper binaries that t
 - Debian packaging in `debian/` (`debhelper >= 9`, `quilt`).
 
 ## Build / test / run
-- Local: `opam install . --deps-only` then `dune build -p vyos-utils`.
+- Local: `opam install. --deps-only` then `dune build -p vyos-utils`.
 - Debian: `dpkg-buildpackage -us -uc -b` produces the `vyos-utils` `.deb`.
 - No `dune runtest` suite in tree; validators are exercised in `vyos-1x` smoketests.
 
